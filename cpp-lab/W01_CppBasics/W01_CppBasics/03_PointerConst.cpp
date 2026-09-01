@@ -27,6 +27,7 @@ void ChangeInt(int* ptr) {
 	*ptr = 2;
 }
 
+/*
 void ChangeInt(const int* ptr) {
 	// 불가능
 	*ptr = 2;
@@ -58,6 +59,7 @@ void ChangeInt(const int& ref) {
 	// 불가능
 	ref = 2;
 }
+*/
 
 // const 뒤에 뭐가 오는지 알면 쉬움
 // const 뒤에 *이 오면 "가리키는 값"을 수정할 수 없음.
