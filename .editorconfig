@@ -1,0 +1,8 @@
+root = true
+
+[*]
+charset = utf-8
+
+# Keep C and C++ source files in UTF-8 with a BOM for Visual Studio/MSVC.
+[*.{c,cc,cpp,cxx,h,hh,hpp,hxx,ipp,ixx}]
+charset = utf-8-bom
