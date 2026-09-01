@@ -122,6 +122,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="01_PointerArithmetic.cpp" />
+    <ClCompile Include="02_ValuePointerReference.cpp" />
+    <ClCompile Include="W01_CppBasics.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StatInfo.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
