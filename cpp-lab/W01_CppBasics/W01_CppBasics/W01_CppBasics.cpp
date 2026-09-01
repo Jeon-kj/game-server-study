@@ -10,5 +10,6 @@ void RunDoublePointerLab();
 
 int main()
 {
-    RunPointerArithmeticLab();
+    //RunPointerArithmeticLab();
+    RunValuePointerReferenceLab();
 }
