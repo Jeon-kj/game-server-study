@@ -1,0 +1,22 @@
+# Visual Studio user and workspace files
+.vs/
+*.user
+*.suo
+
+# C/C++ build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.log
+*.exe
+*.dll
+*.lib
+*.exp
+*.recipe
+
