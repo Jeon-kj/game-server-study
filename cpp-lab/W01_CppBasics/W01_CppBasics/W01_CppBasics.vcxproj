@@ -127,6 +127,7 @@
     <ClCompile Include="02_ValuePointerReference.cpp" />
     <ClCompile Include="03_PointerConst.cpp" />
     <ClCompile Include="04_DoublePointer.cpp" />
+    <ClCompile Include="05_2DArrayVsDoublePointer.cpp" />
     <ClCompile Include="W01_CppBasics.cpp" />
   </ItemGroup>
   <ItemGroup>

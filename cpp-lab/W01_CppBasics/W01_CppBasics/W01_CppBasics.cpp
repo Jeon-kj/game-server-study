@@ -6,10 +6,12 @@ using namespace std;
 void RunPointerArithmeticLab();
 void RunValuePointerReferenceLab();
 void RunDoublePointerLab();
+void Run2DArrayVsDPtr();
 
 int main()
 {
     //RunPointerArithmeticLab();
     //RunValuePointerReferenceLab();
-    RunDoublePointerLab();
+    //RunDoublePointerLab();
+    Run2DArrayVsDPtr();
 }
