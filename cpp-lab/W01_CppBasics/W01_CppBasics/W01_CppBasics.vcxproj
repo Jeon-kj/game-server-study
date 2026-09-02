@@ -132,6 +132,7 @@
     <ClCompile Include="07_Constructor.cpp" />
     <ClCompile Include="08_InheritanceLifetime.cpp" />
     <ClCompile Include="09_AccessSpecifier.cpp" />
+    <ClCompile Include="10_Polymorphism.cpp" />
     <ClCompile Include="W01_CppBasics.cpp" />
   </ItemGroup>
   <ItemGroup>

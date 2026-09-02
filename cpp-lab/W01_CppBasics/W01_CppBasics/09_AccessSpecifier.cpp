@@ -24,6 +24,7 @@ Knight가 Player를 public 상속한다.
 - protected가 private과 다른 점은? 
 */
 
+/*
 class Player {
 public:
 	int _public;
@@ -48,4 +49,4 @@ void Run09Lab() {
 	// 접근할 수 없음
 	//k1._protected = 10;
 	//k1._private = 10;
-}
+}*/
