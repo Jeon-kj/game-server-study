@@ -36,6 +36,9 @@
     <ClCompile Include="06_ClassAndEncapsulation.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="07_Constructor.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StatInfo.h">

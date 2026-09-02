@@ -9,6 +9,7 @@ void RunDoublePointerLab();
 void Run2DArrayVsDPtr();
 // 2026-09-02
 void Run06Lab();
+void Run07Lab();
 
 int main()
 {
@@ -16,5 +17,6 @@ int main()
     //RunValuePointerReferenceLab();
     //RunDoublePointerLab();
     //Run2DArrayVsDPtr();
-    Run06Lab();
+    //Run06Lab();
+    Run07Lab();
 }
