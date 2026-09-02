@@ -18,6 +18,7 @@ Knight 클래스를 만든다.
 - public 변수보다 함수를 통한 수정이 안전한 이유는?
 */
 
+/*
 class Knight {
 public:
 	void TakeDamage(int dmg) {
@@ -44,4 +45,4 @@ void Run06Lab() {
 	cout << "k1 Hp: " << k1.GetHp() << endl;
 	k1.TakeDamage(8);
 	cout << "k1 Hp: " << k1.GetHp() << endl;
-}
+}*/

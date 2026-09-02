@@ -130,6 +130,7 @@
     <ClCompile Include="05_2DArrayVsDoublePointer.cpp" />
     <ClCompile Include="06_ClassAndEncapsulation.cpp" />
     <ClCompile Include="07_Constructor.cpp" />
+    <ClCompile Include="08_InheritanceLifetime.cpp" />
     <ClCompile Include="W01_CppBasics.cpp" />
   </ItemGroup>
   <ItemGroup>

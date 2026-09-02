@@ -10,6 +10,7 @@ void Run2DArrayVsDPtr();
 // 2026-09-02
 void Run06Lab();
 void Run07Lab();
+void Run08Lab();
 
 int main()
 {
@@ -18,5 +19,6 @@ int main()
     //RunDoublePointerLab();
     //Run2DArrayVsDPtr();
     //Run06Lab();
-    Run07Lab();
+    //Run07Lab();
+    Run08Lab();
 }

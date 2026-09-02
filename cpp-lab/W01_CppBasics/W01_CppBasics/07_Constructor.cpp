@@ -22,6 +22,7 @@ Knight 클래스를 만든다.
 - explicit은 무엇을 막는가?
 */
 
+/*
 class Knight {
 public:
 	Knight() {}
@@ -69,4 +70,4 @@ void Run07Lab() {
 	// 1번과 2번의 차이
 	// 1번은 복사 생성자
 	// 2번은 일반 생성자로 생성 후 값 복사
-}
+}*/
