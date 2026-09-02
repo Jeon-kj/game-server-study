@@ -11,6 +11,7 @@ void Run2DArrayVsDPtr();
 void Run06Lab();
 void Run07Lab();
 void Run08Lab();
+void Run09Lab();
 
 int main()
 {
@@ -20,5 +21,6 @@ int main()
     //Run2DArrayVsDPtr();
     //Run06Lab();
     //Run07Lab();
-    Run08Lab();
+    //Run08Lab();
+    Run09Lab();
 }

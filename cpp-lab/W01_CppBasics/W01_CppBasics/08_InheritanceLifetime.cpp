@@ -19,11 +19,12 @@ Knight, Mage 자식 클래스를 만든다.
 - 부모 기본 생성자가 없다면 자식은 어떻게 해야 하는가?
 */
 
+/*
 class Player {
 public:	// 접근 지정자를 명시하지 않으면 private이기 때문에 하위 클래스에서 오류 발생
-	/*Player() {
-		cout << "Player" << endl;
-	}*/
+	//Player() {
+	//	cout << "Player" << endl;
+	//}
 	Player(int hp) {
 		_hp = hp;
 	}
@@ -57,4 +58,4 @@ public:
 void Run08Lab() {
 	Knight k1;
 	Mage m1;
-}
+}*/
