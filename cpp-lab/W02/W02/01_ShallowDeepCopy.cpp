@@ -49,38 +49,39 @@ Pet까지 새로 생성하는 깊은 복사를 구현한다.
 //	Pet* _pet = nullptr;
 //};
 
-// 깊은 복사의 예
-class Pet {
-public:
-	Pet() {
-		cout << "Pet()" << endl;
-	}
-	~Pet() {
-		cout << "~Pet()" << endl;
-	}
+//// 깊은 복사의 예
+//class Pet {
+//public:
+//	Pet() {
+//		cout << "Pet()" << endl;
+//	}
+//	~Pet() {
+//		cout << "~Pet()" << endl;
+//	}
+//
+//	int hp = 100;
+//};
+//
+//class Knight {
+//public:
+//	Knight() {
+//		cout << "Knight()" << endl;
+//	}
+//	~Knight() {
+//		cout << "~Knight()" << endl;
+//		if (_pet)
+//			delete _pet;
+//	}
+//	// 복사 생성자
+//	Knight(const Knight& knight) {
+//		cout << "Knight(const Knight& knight)" << endl;
+//		_pet = new Pet(*knight._pet);
+//	}
+//
+//	Pet* _pet = nullptr;
+//};
 
-	int hp = 100;
-};
-
-class Knight {
-public:
-	Knight() {
-		cout << "Knight()" << endl;
-	}
-	~Knight() {
-		cout << "~Knight()" << endl;
-		if (_pet)
-			delete _pet;
-	}
-	// 복사 생성자
-	Knight(const Knight& knight) {
-		cout << "Knight(const Knight& knight)" << endl;
-		_pet = new Pet(*knight._pet);
-	}
-
-	Pet* _pet = nullptr;
-};
-
+/*
 void Run01Lab() {
 	Knight k1;
 	k1._pet = new Pet;
@@ -93,3 +94,4 @@ void Run01Lab() {
 	//	  당연히 한쪽 값을 수정하면 _pet이 가진 주소 값이 동일하기에 k1._pet->hp 같은 값을 수정하면, 나머지 pet도 동일하게 바뀜.
 	// 2. 깊은 복사의 경우에는 아예 새로운 객체를 생성하여 할당하기 때문에 새로운 _pet 값을 가짐.
 }
+*/
