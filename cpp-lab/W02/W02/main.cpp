@@ -5,6 +5,7 @@
 void Run01Lab();
 void Run02Lab();
 void Run03Lab();
+void Run04Lab();
 
 int main()
 {
@@ -12,5 +13,6 @@ int main()
     //Run01Lab();
     //Run02Lab();
     //Run03Lab();
+    Run04Lab();
 }
 

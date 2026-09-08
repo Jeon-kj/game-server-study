@@ -23,49 +23,49 @@ Test(Knight&& knight)
 - std::move는 실제로 객체를 이동시키는 함수인가?
 */
 
-class Knight {
-public:
-	Knight() {
-		;
-	}
-	~Knight() {
-		;
-	}
+//class Knight {
+//public:
+//	Knight() {
+//		;
+//	}
+//	~Knight() {
+//		;
+//	}
+//
+//	int _hp;
+//	int _mp;
+//};
 
-	int _hp;
-	int _mp;
-};
-
-void Test(Knight& knight) {
-	cout << "Test(Knight& knight)" << endl;
-	knight._hp = 90;
-	knight._mp = 10;
-}
-
-void Test(const Knight& knight) {
-	cout << "Test(const Knight& knight)" << endl;
-	//knight._hp = 90;
-	//knight._mp = 10;
-}
-
-void Test(Knight&& knight) {
-	cout << "Test(Knight&& knight)" << endl;
-	knight._hp -= 10;
-	knight._mp -= 5;
-}
-
-void Run03Lab() {
-	Knight k1;
-	k1._hp = 100;
-	k1._mp = 30;
-
-	// 동일한 이름이라면 k1은 Knight& knight 쪽으로 분류됨.
-	Test(k1);
-	Test(static_cast<const Knight&>(k1));
-	Test(Knight());
-	Test(move(k1));
-	Test(static_cast<Knight&&>(k1));
-	// Test(Knight&& knight)를 호출하는 아래 3 경우는 값을 변경시키지 않을 줄 알았다. 왜냐하면 rvalue는 임시 객체니까.
-	// 그치만 static_cast<Knight&&>()나 move는 "이 객체를 rvalue로 취급한다"고 바꾸는 캐스팅이고 엄연히 원본이 있는 변수라서 바뀜.
-	// 물론 Test(Knight());의 경우 내 의도대로 값을 바꾸지 못함. -> 애초에 k1의 값을 넘겨주지 않았으니 당연.
-}
+//void Test(Knight& knight) {
+//	cout << "Test(Knight& knight)" << endl;
+//	knight._hp = 90;
+//	knight._mp = 10;
+//}
+//
+//void Test(const Knight& knight) {
+//	cout << "Test(const Knight& knight)" << endl;
+//	//knight._hp = 90;
+//	//knight._mp = 10;
+//}
+//
+//void Test(Knight&& knight) {
+//	cout << "Test(Knight&& knight)" << endl;
+//	knight._hp -= 10;
+//	knight._mp -= 5;
+//}
+//
+//void Run03Lab() {
+//	Knight k1;
+//	k1._hp = 100;
+//	k1._mp = 30;
+//
+//	// 동일한 이름이라면 k1은 Knight& knight 쪽으로 분류됨.
+//	Test(k1);
+//	Test(static_cast<const Knight&>(k1));
+//	Test(Knight());
+//	Test(move(k1));
+//	Test(static_cast<Knight&&>(k1));
+//	// Test(Knight&& knight)를 호출하는 아래 3 경우는 값을 변경시키지 않을 줄 알았다. 왜냐하면 rvalue는 임시 객체니까.
+//	// 그치만 static_cast<Knight&&>()나 move는 "이 객체를 rvalue로 취급한다"고 바꾸는 캐스팅이고 엄연히 원본이 있는 변수라서 바뀜.
+//	// 물론 Test(Knight());의 경우 내 의도대로 값을 바꾸지 못함. -> 애초에 k1의 값을 넘겨주지 않았으니 당연.
+//}
