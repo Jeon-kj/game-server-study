@@ -2,10 +2,13 @@
 #include <iostream>
 #include <crtdbg.h>
 
+// Day1
 void Run01Lab();
 void Run02Lab();
 void Run03Lab();
 void Run04Lab();
+// Day2
+void Run05Lab();
 
 int main()
 {
@@ -13,6 +16,7 @@ int main()
     //Run01Lab();
     //Run02Lab();
     //Run03Lab();
-    Run04Lab();
+    //Run04Lab();
+    Run05Lab();
 }
 

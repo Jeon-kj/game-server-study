@@ -30,5 +30,8 @@
     <ClCompile Include="04_MoveSemantics.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="05_VectorCapacity.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

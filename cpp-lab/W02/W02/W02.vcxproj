@@ -127,6 +127,7 @@
     <ClCompile Include="02_CopyAssignment.cpp" />
     <ClCompile Include="03_RValueReference.cpp" />
     <ClCompile Include="04_MoveSemantics.cpp" />
+    <ClCompile Include="05_VectorCapacity.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
