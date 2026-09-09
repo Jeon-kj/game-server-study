@@ -36,5 +36,8 @@
     <ClCompile Include="06_VectorReallocation.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="07_VectorIteratorErase.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

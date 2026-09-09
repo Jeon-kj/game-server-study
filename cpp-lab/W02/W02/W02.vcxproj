@@ -129,6 +129,7 @@
     <ClCompile Include="04_MoveSemantics.cpp" />
     <ClCompile Include="05_VectorCapacity.cpp" />
     <ClCompile Include="06_VectorReallocation.cpp" />
+    <ClCompile Include="07_VectorIteratorErase.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
