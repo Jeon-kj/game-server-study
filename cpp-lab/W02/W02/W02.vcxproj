@@ -130,6 +130,7 @@
     <ClCompile Include="05_VectorCapacity.cpp" />
     <ClCompile Include="06_VectorReallocation.cpp" />
     <ClCompile Include="07_VectorIteratorErase.cpp" />
+    <ClCompile Include="08_SimpleVector.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

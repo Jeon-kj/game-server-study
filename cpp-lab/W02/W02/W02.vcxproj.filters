@@ -39,5 +39,8 @@
     <ClCompile Include="07_VectorIteratorErase.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="08_SimpleVector.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
