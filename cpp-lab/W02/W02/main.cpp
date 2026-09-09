@@ -9,6 +9,7 @@ void Run03Lab();
 void Run04Lab();
 // Day2
 void Run05Lab();
+void Run06Lab();
 
 int main()
 {
@@ -17,6 +18,7 @@ int main()
     //Run02Lab();
     //Run03Lab();
     //Run04Lab();
-    Run05Lab();
+    //Run05Lab();
+    Run06Lab();
 }
 
