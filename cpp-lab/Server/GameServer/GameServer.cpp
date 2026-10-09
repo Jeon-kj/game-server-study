@@ -12,6 +12,63 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+bool SendAll(SOCKET clientSocket, char* sendBuffer, int32 length)
+{
+	int32 progress = 0;
+
+	while (length != 0)
+	{
+		int32 resultCode = ::send(clientSocket, sendBuffer + progress, length, 0);
+		if (resultCode == SOCKET_ERROR)
+		{
+			int32 errCode = ::WSAGetLastError();
+			cout << "Send ErrorCode : " << errCode << endl;
+			return false;
+		}
+
+		if (resultCode == 0)
+		{
+			cout << "Disconnected" << endl;
+			return false;
+		}
+
+		cout << "send scope : " << progress << "~" << progress + resultCode - 1 << endl;
+		cout << "send data : ";
+		cout.write(sendBuffer + progress, resultCode);
+		cout << endl;
+
+		progress += resultCode;
+		length -= resultCode;
+	}
+
+	return true;
+}
+
+int32 Recv(SOCKET clientSocket, char* recvBuffer, int32 length)
+{
+	int32 recvLen = ::recv(clientSocket, recvBuffer, length, 0);
+
+	if (recvLen == SOCKET_ERROR)
+	{
+		int32 errCode = ::WSAGetLastError();
+		cout << "Recv ErrorCode : " << errCode << endl;
+		return -1;
+	}
+	else if (recvLen == 0)
+	{
+		cout << "Disconnected" << endl;
+		return 0;
+	}
+
+	cout << "Receive Data! - data : ";
+	cout.write(recvBuffer, recvLen);
+	cout << endl;
+
+	cout << "Receive Data! - length : " << recvLen << endl;
+
+	return recvLen;
+}
+
 int main()
 {
 	WSAData wsaData;
@@ -23,6 +80,7 @@ int main()
 	{
 		int32 errCode = ::WSAGetLastError();
 		cout << "Socket ErrorCode : " << errCode << endl;
+		::WSACleanup();
 		return 0;
 	}
 
@@ -37,6 +95,8 @@ int main()
 	{
 		int32 errCode = ::WSAGetLastError();
 		cout << "Bind ErrorCode : " << errCode << endl;
+		::closesocket(listenSocket);
+		::WSACleanup();
 		return 0;
 	}
 
@@ -44,6 +104,8 @@ int main()
 	{
 		int32 errCode = ::WSAGetLastError();
 		cout << "Listen ErrorCode : " << errCode << endl;
+		::closesocket(listenSocket);
+		::WSACleanup();
 		return 0;
 	}
 
@@ -63,6 +125,8 @@ int main()
 		{
 			int32 errCode = ::WSAGetLastError();
 			cout << "Accept ErrorCode : " << errCode << endl;
+			::closesocket(listenSocket);
+			::WSACleanup();
 			return 0;
 		}
 
@@ -74,33 +138,22 @@ int main()
 		while (true)
 		{
 			char recvBuffer[1000];
-
-			int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+			int32 recvLen = Recv(clientSocket, recvBuffer, sizeof(recvBuffer));
 			if (recvLen <= 0)
-			{
-				int32 errCode = ::WSAGetLastError();
-				cout << "Recv ErrorCode : " << errCode << endl;
-				return 0;
-			}
-
-			cout << "Receive Data! - data : " << recvBuffer << endl;
-			cout << "Receive Data! - length : " << sizeof(recvBuffer) << endl;
+				break;
 
 
-			int32 resultCode = ::send(clientSocket, recvBuffer, recvLen, 0);
-			if (resultCode == SOCKET_ERROR)
-			{
-				int32 errCode = ::WSAGetLastError();
-				cout << "Send ErrorCode : " << errCode << endl;
-				return 0;
-			}
-			cout << "Echo Data! - data : " << recvBuffer << endl;
-			cout << "Echo Data! - length : " << sizeof(recvBuffer) << endl;
+			bool flag = SendAll(clientSocket, recvBuffer, recvLen);
+			if (!flag)
+				break;
 		}
+
+		::closesocket(clientSocket);
 	}
 
 	// --------------------------
 
 	// 윈속 종료
+	::closesocket(listenSocket);
 	::WSACleanup();
 }
