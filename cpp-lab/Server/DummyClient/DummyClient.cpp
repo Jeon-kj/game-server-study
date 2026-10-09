@@ -7,6 +7,13 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+enum ParseResult
+{
+    Complete,
+    NeedMore,
+    Invalid
+};
+
 bool SendAll(SOCKET clientSocket, char* sendBuffer, int32 length)
 {
     int32 progress = 0;
@@ -64,6 +71,58 @@ int32 Recv(SOCKET clientSocket, char* recvBuffer, int32 length)
     return recvLen;
 }
 
+char* PackMessage(char* msg, int32& dataLen)
+{
+    if (dataLen < 0 || dataLen > 1024 - 4)
+        return nullptr;
+
+    dataLen = dataLen + 4;
+    char* sendData = new char[dataLen];
+
+    sendData[0] = static_cast<char>((dataLen >> 8) & 0xFF);
+    sendData[1] = static_cast<char>(dataLen & 0xFF);
+
+    sendData[2] = 0;
+    sendData[3] = 1; // type 미정
+
+    memcpy(sendData + 4, msg, dataLen - 4);
+
+    return sendData;
+}
+
+ParseResult UnpackMessage(char* recvBuffer, int32& recvLen)
+{
+    if (recvLen < 4)
+    {
+        cout << "NeedMore" << endl; // 헤더 부족
+        return NeedMore;
+    }
+
+    const auto* bytes = reinterpret_cast<const unsigned char*>(recvBuffer);
+
+    int32 header_len = (bytes[0] << 8) | bytes[1];
+    int32 header_type = (bytes[2] << 8) | bytes[3];
+
+    if (header_len < 4 || header_len > 1024)
+    {
+        cout << "Invalid" << endl;
+        return Invalid;
+    }
+
+    if (recvLen < header_len)
+    {
+        cout << "NeedMore" << endl;
+        return NeedMore;
+    }
+
+    cout << "Complete" << endl;
+
+    memmove(recvBuffer, recvBuffer + 4, header_len - 4);
+    recvLen = header_len - 4;
+
+    return Complete;
+}
+
 int main()
 {
     WSAData wsaData;
@@ -102,19 +161,31 @@ int main()
     while (true)
     {
         // TODO
-        char sendBuffer[] = "Hello";
+        char msg[] = "Hello";
 
-        bool flag = SendAll(clientSocket, sendBuffer, sizeof(sendBuffer)-1);
+        int32 dataLen = strlen(msg);
+        char* sendBuffer = PackMessage(msg, dataLen);
+        if (sendBuffer == nullptr)
+        {
+            cout << "Packaging Error" << endl;
+            break;
+        }
+
+        bool flag = SendAll(clientSocket, sendBuffer, dataLen);
+        delete[] sendBuffer;
         if (!flag)
             break;
 
         char recvBuffer[1000];
-
         int32 recvLen = Recv(clientSocket, recvBuffer, sizeof(recvBuffer));
         if (recvLen <= 0)
             break;
 
-        this_thread::sleep_for(std::chrono::milliseconds(100000));
+        int32 result =  UnpackMessage(recvBuffer, recvLen);
+        if (result != Complete)
+            break;
+
+        this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     // --------------------------
