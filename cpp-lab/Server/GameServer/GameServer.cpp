@@ -7,30 +7,100 @@
 #include <future>
 #include "ThreadManager.h"
 
-#include "PlayerManager.h"
-#include "AccountManager.h"
+#include <WinSock2.h>
+#include <mswsock.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
 
 int main()
 {
-	GThreadManager->Launch([=]
-		{
-			while (true)
-			{
-				cout << "PlayerThenAccount" << endl;
-				GPlayerManager.PlayerThenAccount();
-				this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		});
+	WSAData wsaData;
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return 0;
 
-	GThreadManager->Launch([=]
-		{
-			while (true)
-			{
-				cout << "AccountThenPlayer" << endl;
-				GAccountManager.AccountThenPlayer();
-				this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		});
+	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (listenSocket == INVALID_SOCKET)
+	{
+		int32 errCode = ::WSAGetLastError();
+		cout << "Socket ErrorCode : " << errCode << endl;
+		return 0;
+	}
 
-	GThreadManager->Join();
+	// 나의 주소는?
+	SOCKADDR_IN serverAddr;
+	::memset(&serverAddr, 0, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY); // 알아서 해줘 (가능한 주소 모두 연결?)
+	serverAddr.sin_port = htons(7777);
+
+	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	{
+		int32 errCode = ::WSAGetLastError();
+		cout << "Bind ErrorCode : " << errCode << endl;
+		return 0;
+	}
+
+	if(::listen(listenSocket, 10) == SOCKET_ERROR) // 10 = 대기 가능한 소켓 수
+	{
+		int32 errCode = ::WSAGetLastError();
+		cout << "Listen ErrorCode : " << errCode << endl;
+		return 0;
+	}
+
+	// --------------------------
+	
+	while (true)
+	{
+		SOCKADDR_IN clientAddr;
+		::memset(&clientAddr, 0, sizeof(clientAddr));
+		int32 addrLen = sizeof(clientAddr);
+
+		// 두번째 매개변수부터는 nullptr 가능
+		// 연결이 된 순간부터 운영체제가 연결 정보를 관리하기 때문에 주소를 따로 받지 않아도 통신 가능
+		// 심지어 나중에 SOCKET변수로부터 추출할 수도 있음
+		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+		if (clientSocket == INVALID_SOCKET)
+		{
+			int32 errCode = ::WSAGetLastError();
+			cout << "Accept ErrorCode : " << errCode << endl;
+			return 0;
+		}
+
+		char ipAddress[16];
+		::inet_ntop(AF_INET, &clientAddr.sin_addr, ipAddress, sizeof(ipAddress));
+		cout << "Client Connected! IP = " << ipAddress << endl;
+
+		//TODO
+		while (true)
+		{
+			char recvBuffer[1000];
+
+			int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLen <= 0)
+			{
+				int32 errCode = ::WSAGetLastError();
+				cout << "Recv ErrorCode : " << errCode << endl;
+				return 0;
+			}
+
+			cout << "Receive Data! - data : " << recvBuffer << endl;
+			cout << "Receive Data! - length : " << sizeof(recvBuffer) << endl;
+
+
+			int32 resultCode = ::send(clientSocket, recvBuffer, recvLen, 0);
+			if (resultCode == SOCKET_ERROR)
+			{
+				int32 errCode = ::WSAGetLastError();
+				cout << "Send ErrorCode : " << errCode << endl;
+				return 0;
+			}
+			cout << "Echo Data! - data : " << recvBuffer << endl;
+			cout << "Echo Data! - length : " << sizeof(recvBuffer) << endl;
+		}
+	}
+
+	// --------------------------
+
+	// 윈속 종료
+	::WSACleanup();
 }
