@@ -30,103 +30,188 @@ int main()
 
 	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET)
+	{
+		::WSACleanup();
 		return 0;
-
-	// non blocking 모드
-	u_long on = 1;
-	if (::ioctlsocket(listenSocket, FIONBIO, &on) == INVALID_SOCKET)
-		return 0;
+	}
 
 	SOCKADDR_IN serverAddr{ 0 };
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	serverAddr.sin_port = ::htons(7777);
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddr.sin_port = htons(7777);
 
 	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	{
+		::closesocket(listenSocket);
+		::WSACleanup();
 		return 0;
+	}
 
-	if (::listen(listenSocket, 10) == SOCKET_ERROR)
+	if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
+	{
+		::closesocket(listenSocket);
+		::WSACleanup();
 		return 0;
+	}
 
 	cout << "Accept" << endl;
 
+	vector<WSAEVENT> wsaEvents;
+	wsaEvents.reserve(64);
 	vector<Session> sessions;
 	sessions.reserve(100);
 
-	fd_set reads;
-	fd_set writes;
+	WSAEVENT listenEvent = ::WSACreateEvent();
+	wsaEvents.push_back(listenEvent);
+	sessions.push_back(Session{ listenSocket });
+	if (::WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR)
+	{
+		::closesocket(listenSocket);
+		::WSACleanup();
+		return 0;
+	}
 
 	while (true)
 	{
-		// 소켓 셋 초기화
-		FD_ZERO(&reads);
-		FD_ZERO(&writes);
+		// 반환값 = WSA_WAIT_EVENT_0 + 이벤트 배열 인덱스
+		int32 index = ::WSAWaitForMultipleEvents(wsaEvents.size(), &wsaEvents[0], FALSE, WSA_INFINITE, FALSE);
+		if (index == WSA_WAIT_FAILED)
+			continue;
 
-		// ListenSocket 등록
-		FD_SET(listenSocket, &reads);
+		index -= WSA_WAIT_EVENT_0;
 
-		// 소켓 등록
-		for (Session& s : sessions)
+		WSANETWORKEVENTS networkEvents;
+		if (::WSAEnumNetworkEvents(sessions[index].socket, wsaEvents[index], &networkEvents) == SOCKET_ERROR)
+			continue;
+
+		if (networkEvents.lNetworkEvents & FD_ACCEPT)
 		{
-			if (s.recvBytes <= s.sendBytes)
-				FD_SET(s.socket, &reads);
-			else
-				FD_SET(s.socket, &writes);
-		}
+			if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
+				continue;
 
-		// [옵션] 마지막 timeout 인자 설정 가능
-		int32 retVal = ::select(0, &reads, &writes, nullptr, nullptr);
-		if (retVal == SOCKET_ERROR)
-			break;
-
-		// Listener 소켓 체크
-		if (FD_ISSET(listenSocket, &reads))
-		{
 			SOCKADDR_IN clientAddr;
 			int32 addrLen = sizeof(clientAddr);
+
 			SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
 			if (clientSocket != INVALID_SOCKET)
 			{
-				cout << "Client Connected" << endl;
+				cout << "Client Connected!" << endl;
+				WSAEVENT clientEvent = ::WSACreateEvent();
+				wsaEvents.push_back(clientEvent);
 				sessions.push_back(Session{ clientSocket });
+				if (::WSAEventSelect(clientSocket, clientEvent, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+					return 0;
 			}
+			else
+			{
+				int32 err = ::WSAGetLastError();
+				if (err == WSAEWOULDBLOCK)
+					continue;
+
+				
+				cout << "Accept Error: " << err << endl;
+				continue;
+			}
+
+			
 		}
 
-		// 나머지 소켓 체크
-		for (Session& s : sessions)
+		if (networkEvents.lNetworkEvents & FD_READ || networkEvents.lNetworkEvents & FD_WRITE)
 		{
-			if (FD_ISSET(s.socket, &reads))
+			// Error-Check
+			if ((networkEvents.lNetworkEvents & FD_READ) && (networkEvents.iErrorCode[FD_READ_BIT] != 0))
+				continue;
+			// Error-Check
+			if ((networkEvents.lNetworkEvents & FD_WRITE) && (networkEvents.iErrorCode[FD_WRITE_BIT] != 0))
+				continue;
+
+			Session& s = sessions[index];
+
+			if (s.recvBytes == 0)
 			{
-				int32 recvLen = ::recv(s.socket, s.recvBuffer, BUFSIZE, 0);
-				if (recvLen <= 0)
+				int32 recvLen = ::recv(s.socket, &s.recvBuffer[s.recvBytes], BUFSIZE - s.recvBytes, 0);
+				if (recvLen == SOCKET_ERROR)
 				{
-					// TODO: sessions 제거
+					if (::WSAGetLastError() == WSAEWOULDBLOCK)
+						continue;
+
+					// 오류 처리
+					::closesocket(s.socket);
+					::WSACloseEvent(wsaEvents[index]);
+
+					sessions.erase(sessions.begin() + index);
+					wsaEvents.erase(wsaEvents.begin() + index);
 					continue;
 				}
 
-				s.recvBytes = recvLen;
-			}
+				if (recvLen == 0)
+				{
+					// 정상 연결 해제 요청
+					::closesocket(s.socket);
+					::WSACloseEvent(wsaEvents[index]);
 
-			if (FD_ISSET(s.socket, &writes))
+					sessions.erase(sessions.begin() + index);
+					wsaEvents.erase(wsaEvents.begin() + index);
+					continue;
+				}
+
+				s.recvBytes += recvLen;
+				cout << "recv Data : " << s.recvBuffer << endl;
+			}
+			
+			if (s.recvBytes > s.sendBytes)
 			{
-				// 블로킹 모드 -> 모든 데이터 다 보냄
-				// 논블로킹 모드 -> 일부만 보낼 수 있음 (상대방 수신 버퍼 상황에 따라)
+				// Echo
 				int32 sendLen = ::send(s.socket, &s.recvBuffer[s.sendBytes], s.recvBytes - s.sendBytes, 0);
 				if (sendLen == SOCKET_ERROR)
 				{
-					// TODO: sessions 제거
+					if (::WSAGetLastError() == WSAEWOULDBLOCK)
+						continue;
+
+					// 오류 처리
+					::closesocket(s.socket);
+					::WSACloseEvent(wsaEvents[index]);
+
+					sessions.erase(sessions.begin() + index);
+					wsaEvents.erase(wsaEvents.begin() + index);
 					continue;
 				}
 
 				s.sendBytes += sendLen;
-				if (s.recvBytes == s.sendBytes)
+				cout << "send Data Len : " << s.sendBytes << endl;
+				if (s.sendBytes == s.recvBytes)
 				{
-					s.recvBytes = 0;
 					s.sendBytes = 0;
+					s.recvBytes = 0;
 				}
-			}
+			}			
+		}
+
+		if (networkEvents.lNetworkEvents & FD_CLOSE)
+		{
+			int32 err = networkEvents.iErrorCode[FD_CLOSE_BIT];
+
+			if (err != 0)
+				cout << "FD_CLOSE Error : " << err << endl;
+
+			// TODO : Remove Socket
+			::closesocket(sessions[index].socket);
+			::WSACloseEvent(wsaEvents[index]);
+
+			sessions.erase(sessions.begin() + index);
+			wsaEvents.erase(wsaEvents.begin() + index);
 		}
 	}
+
+	for (int32 i = 0; i < sessions.size(); i++)
+	{
+		::closesocket(sessions[i].socket);
+		::WSACloseEvent(wsaEvents[i]);
+	}
+	sessions.clear();
+	wsaEvents.clear();
+	
+	::WSACleanup();
 
 	return 0;
 }
