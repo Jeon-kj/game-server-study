@@ -13,6 +13,9 @@
     <Filter Include="Thread">
       <UniqueIdentifier>{d549fa01-d407-4491-b030-49ee45b35c05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{987c2eaa-6528-4b88-82d0-99877f7f2415}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CorePch.h">
