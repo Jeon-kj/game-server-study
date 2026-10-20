@@ -45,94 +45,25 @@ int main()
 
 	char sendBuffer[100] = "Hello World";
 
-	vector<Session> sessions;
-	sessions.reserve(100);
-	sessions.push_back(Session{ clientSocket });
-
-	fd_set reads;
-	fd_set writes;
 
 	while (true)
 	{
-		if (sessions.empty())
-			break;
-
-		FD_ZERO(&reads);
-		FD_ZERO(&writes);
-
-		for (Session& s : sessions)
+		int32 sendLen = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
+		if (sendLen == SOCKET_ERROR)
 		{
-			if (s.sendBytes < sizeof(sendBuffer))
-				FD_SET(s.socket, &writes);
-			else
-				FD_SET(s.socket, &reads);
+			if (::WSAGetLastError() == WSAEWOULDBLOCK)
+				continue;
+
+			break;
 		}
 
-		int32 retVal = ::select(0, &reads, &writes, nullptr, nullptr);
-		if (retVal == SOCKET_ERROR)
-			break;
-
-		for (auto it = sessions.begin(); it != sessions.end();)
-		{
-			Session& s = *it;
-			if (FD_ISSET(s.socket, &reads))
-			{
-				int32 recvLen = ::recv(s.socket, &s.recvBuffer[s.recvBytes], s.sendBytes-s.recvBytes, 0);
-				if (recvLen == SOCKET_ERROR)
-				{
-					if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					{
-						++it;
-						continue;
-					}
-
-					// TODO: sessions 제거
-					::closesocket(s.socket);
-					it = sessions.erase(it);
-					continue;
-				}
-
-				if (recvLen == 0)
-				{
-					// 정상적인 연결 종료
-					::closesocket(s.socket);
-					it = sessions.erase(it);
-					continue;
-				}
-
-				s.recvBytes += recvLen;
-				if (s.recvBytes == s.sendBytes)
-				{
-					s.recvBytes = 0;
-					s.sendBytes = 0;
-				}
-			}
-
-			if (FD_ISSET(s.socket, &writes))
-			{
-				int32 sendLen = ::send(s.socket, sendBuffer+s.sendBytes, sizeof(sendBuffer)-s.sendBytes, 0);
-				if (sendLen == SOCKET_ERROR)
-				{
-					if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					{
-						++it;
-						continue;
-					}
-
-					// TODO: sessions 제거
-					::closesocket(s.socket);
-					it = sessions.erase(it);
-					continue;
-				}
-
-				s.sendBytes += sendLen;
-				
-				cout << "Send Data ! Len = " << sizeof(sendBuffer) << endl;
-				cout << "Send Data : " << sendBuffer << endl;
-			}
-			++it;
-		}
-
+		cout << "Send Data Len = " << sendLen << endl;
+		cout << "Send Data : " << sendBuffer << endl;
 		this_thread::sleep_for(std::chrono::seconds(1));
 	}
+
+	::closesocket(clientSocket);
+	::WSACleanup();
+
+	return 0;
 }
