@@ -59,7 +59,7 @@ int main()
 
 		cout << "Send Data Len = " << sendLen << endl;
 		cout << "Send Data : " << sendBuffer << endl;
-		this_thread::sleep_for(std::chrono::seconds(1));
+		//this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	::closesocket(clientSocket);
