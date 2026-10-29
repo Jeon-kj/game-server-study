@@ -1,71 +1,72 @@
 ﻿#include "pch.h"
-#include <iostream>
-#include <thread>
 #include <chrono>
 
-#include <WinSock2.h>
-#include <mswsock.h>
-#include <WS2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
+#include "ThreadManager.h"
 
-const int32 BUFSIZE = 1000;
+#include "Service.h"
+#include "Session.h"
 
-struct Session
+char sendBuffer[] = "Hello World";
+
+class ServerSession : public Session
 {
-	SOCKET socket = INVALID_SOCKET;
-	char recvBuffer[BUFSIZE] = {};
-	int32 recvBytes = 0;
-	int32 sendBytes = 0;
+public:
+	~ServerSession()
+	{
+		cout << "~ServerSession" << endl;
+	}
+
+	virtual void OnConnected() override
+	{
+		cout << "Connected To Server" << endl;
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+	}
+
+	virtual int32 OnRecv(BYTE* buffer, int32 len) override
+	{
+		cout << "OnRecv Len = " << len << endl;
+
+		this_thread::sleep_for(chrono::seconds(1));
+
+		Send((BYTE*)sendBuffer, sizeof(sendBuffer));
+		return len;
+	}
+
+	virtual void OnSend(int32 len) override
+	{
+		cout << "OnSend Len = " << len << endl;
+	}
+
+	virtual void OnDisconnected() override
+	{
+		cout << "Disconnected" << endl;
+	}
 };
 
 int main()
 {
-	WSAData wsaData;
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		return 0;
+	this_thread::sleep_for(chrono::seconds(1));
 
-	SOCKET clientSocket = ::socket(AF_INET, SOCK_STREAM, 0);
-	if (clientSocket == INVALID_SOCKET)
-		return 0;
+	ClientServiceRef service = make_shared<ClientService>(
+		NetAddress(L"127.0.0.1", 7777),
+		make_shared<IocpCore>(),
+		[]() -> SessionRef {
+			return make_shared<ServerSession>();
+		},
+		1);
 
+	ASSERT_CRASH(service->Start());
 
-	SOCKADDR_IN serverAddr;
-	serverAddr.sin_family = AF_INET;
-	::inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
-	serverAddr.sin_port = htons(7777);
-
-	if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-		return 0;
-
-	cout << "Connected to Server!" << endl;
-
-	u_long on = 1;
-	if (::ioctlsocket(clientSocket, FIONBIO, &on) == SOCKET_ERROR)
-		return 0;
-
-	char sendBuffer[100] = "Hello World";
-
-
-	while (true)
+	for (int32 i = 0; i < 2; i++)
 	{
-		int32 sendLen = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
-		if (sendLen == SOCKET_ERROR)
-		{
-			int32 errorCode = ::WSAGetLastError();
-			if (errorCode == WSAEWOULDBLOCK)
-				continue;
-
-			this_thread::sleep_for(std::chrono::seconds(1));
-			break;
-		}
-
-		cout << "Send Data Len = " << sendLen << endl;
-		cout << "Send Data : " << sendBuffer << endl;
-		this_thread::sleep_for(std::chrono::seconds(1));
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					service->GetIocpCore()->Dispatch();
+				}
+			});
 	}
 
-	::closesocket(clientSocket);
-	::WSACleanup();
-
-	return 0;
+	GThreadManager->Join();
 }
