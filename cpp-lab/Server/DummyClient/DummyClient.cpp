@@ -51,15 +51,17 @@ int main()
 		int32 sendLen = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
 		if (sendLen == SOCKET_ERROR)
 		{
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
+			int32 errorCode = ::WSAGetLastError();
+			if (errorCode == WSAEWOULDBLOCK)
 				continue;
 
+			this_thread::sleep_for(std::chrono::seconds(1));
 			break;
 		}
 
 		cout << "Send Data Len = " << sendLen << endl;
 		cout << "Send Data : " << sendBuffer << endl;
-		//this_thread::sleep_for(std::chrono::milliseconds(100));
+		this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	::closesocket(clientSocket);
