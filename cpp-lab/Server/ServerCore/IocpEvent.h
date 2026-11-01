@@ -78,6 +78,6 @@ class SendEvent : public IocpEvent
 public:
 	SendEvent() : IocpEvent(EventType::Send) {}
 
-	// TEMP
-	vector<BYTE> buffer;
+	// 왜 vector로 하지? SendBufferRef 단일이 아니라
+	vector<SendBufferRef> sendBuffers;
 };

@@ -13,6 +13,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <queue>
 
 #include <Windows.h>
 #include <iostream>
@@ -24,3 +25,4 @@ using namespace std;
 #pragma comment(lib, "ws2_32.lib")
 
 #include "Lock.h"
+#include "SendBuffer.h"
