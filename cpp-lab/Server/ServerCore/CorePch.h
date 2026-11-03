@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <array>
 
 #include <Windows.h>
 #include <iostream>
