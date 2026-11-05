@@ -6,6 +6,7 @@
 #include "Service.h"
 #include "Session.h"
 #include "BufferReader.h"
+#include "ClientPacketHandler.h"
 
 char sendData[] = "Hello World";
 
@@ -22,25 +23,9 @@ public:
 		//cout << "Connected To Server" << endl;
 	}
 
-	virtual int32 OnRecvPacket(BYTE* buffer, int32 len) override
+	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
 	{
-		BufferReader br(buffer, len);
-
-		PacketHeader header;
-		br >> header;
-		
-		uint64 id;
-		uint32 hp;
-		uint16 attack;
-		br >> id >> hp >> attack;
-
-		cout << "ID: " << id << " HP: " << hp << " ATT: " << attack << endl;
-
-		char recvBuffer[4096];
-		::memcpy(recvBuffer, &buffer[4], header.size - sizeof(PacketHeader) - 8 - 4 - 2);
-		cout << recvBuffer << endl;
-
-		return len;
+		ClientPacketHandler::HandlePacket(buffer, len);
 	}
 
 	virtual void OnSend(int32 len) override
@@ -64,7 +49,7 @@ int main()
 		[]() -> SessionRef {
 			return make_shared<ServerSession>();
 		},
-		1000);
+		1);
 
 	ASSERT_CRASH(service->Start());
 
