@@ -5,27 +5,38 @@ enum
 	S_TEST = 1
 };
 
-
-// 패킷 설계 TEMP
-struct BuffData
+#pragma pack(1)
+struct PKT_S_TEST
 {
-	uint64 buffId;
-	float remainTime;
-};
+	struct BuffsListItem
+	{
+		uint64 buffId;
+		float remainTime;
+	};
 
-struct S_TEST
-{
-	uint64 id;
-	uint32 hp;
-	uint16 attack;
-	// 가변 데이터
-	// 1) 문자열 (ex. name)
-	// 2) 그냥 바이트 배열 (ex. 길드 이미지)
-	// 3) 일반 리스트
-	vector<BuffData> buffs;
+	uint16 packetSize;	// 공용 헤더
+	uint16 pakcetId;	// 공용 헤더
+	uint64 id;	// 8
+	uint32 hp;	// 4
+	uint16 attack;	// 2
+	uint16 buffsOffset;
+	uint16 buffsCount;
 
-	wstring name;
+	bool Validate()
+	{
+		uint32 size = 0;
+		size += sizeof(PKT_S_TEST);
+		size += buffsCount * sizeof(BuffsListItem);
+		if (size != packetSize)
+			return false;
+
+		if (buffsOffset + buffsCount * sizeof(BuffsListItem) > packetSize)
+			return false;
+
+		return true;
+	}
 };
+#pragma pack()
 
 class ClientPacketHandler
 {
