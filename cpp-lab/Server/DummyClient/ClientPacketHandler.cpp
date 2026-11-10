@@ -28,13 +28,20 @@ void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
 
 	PKT_S_TEST::BuffsList buffs = pkt->GetBuffsList();
 
-	cout << "bufCount : " << buffs.Count() << endl;
-	for (int32 i = 0; i < buffs.Count(); i++)
-		cout << "BufInfo : " << buffs[i].buffId << " " << buffs[i].remainTime << endl;
-
-	for (auto it = buffs.begin(); it != buffs.end(); ++it)
-		cout << "BufInfo : " << it->buffId << " " << it->remainTime << endl;
+	cout << "BufCount : " << buffs.Count() << endl;
 
 	for (auto& buff : buffs)
+	{
 		cout << "BufInfo : " << buff.buffId << " " << buff.remainTime << endl;
+
+		PKT_S_TEST::BuffsVictimsList victims = pkt->GetBuffsVictimList(&buff);
+		
+		cout << "Victim Count : " << victims.Count() << endl;
+
+		for (auto& victim : victims)
+		{
+			cout << "Victim : " << victim << endl;
+		}
+	}
+		
 }

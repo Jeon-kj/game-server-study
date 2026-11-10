@@ -60,6 +60,18 @@ struct PKT_S_TEST
 	{
 		uint64 buffId;
 		float remainTime;
+
+		uint16 victimsOffset;
+		uint16 victimsCount;
+
+		bool Validate(BYTE* packetStart, uint16 packetSize, OUT uint32& size)
+		{
+			if (victimsOffset + victimsCount * sizeof(uint64) > packetSize)
+				return false;
+
+			size += victimsCount * sizeof(uint64);
+			return true;
+		}
 	};
 
 	uint16 packetSize;	// 공용 헤더
@@ -77,23 +89,41 @@ struct PKT_S_TEST
 		if (packetSize < size)
 			return false;
 
-		size += buffsCount * sizeof(BuffsListItem);
-		if (size != packetSize)
+		if (buffsOffset + buffsCount * sizeof(BuffsListItem) > packetSize)
 			return false;
 
-		if (buffsOffset + buffsCount * sizeof(BuffsListItem) > packetSize)
+		// Buffers 가변 데이터 크기 추가
+		size += buffsCount * sizeof(BuffsListItem);
+
+		BuffsList buffList = GetBuffsList();
+		for (int32 i = 0; i < buffList.Count(); i++)
+		{
+			if (buffList[i].Validate((BYTE*)this, packetSize, OUT size) == false)
+				return false;
+		}
+
+		// 최종 크기 비교
+		if (size != packetSize)
 			return false;
 
 		return true;
 	}
 
 	using BuffsList = PacketList<PKT_S_TEST::BuffsListItem>;
+	using BuffsVictimsList = PacketList<uint64>;
 
 	BuffsList GetBuffsList()
 	{
 		BYTE* data = reinterpret_cast<BYTE*>(this);
 		data += buffsOffset;
 		return BuffsList(reinterpret_cast<PKT_S_TEST::BuffsListItem*>(data), buffsCount);
+	}
+
+	BuffsVictimsList GetBuffsVictimList(BuffsListItem* buffsItem)
+	{
+		BYTE* data = reinterpret_cast<BYTE*>(this);
+		data += buffsItem->victimsOffset;
+		return BuffsVictimsList(reinterpret_cast<uint64*>(data), buffsItem->victimsCount);
 	}
 };
 #pragma pack()
