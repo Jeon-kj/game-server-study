@@ -21,24 +21,20 @@ void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
 {
 	BufferReader br(buffer, len);
 
-	if (len < sizeof(PKT_S_TEST))
+	PKT_S_TEST* pkt = reinterpret_cast<PKT_S_TEST*>(buffer);
+
+	if (pkt->Validate() == false)
 		return;
 
-	PKT_S_TEST pkt;
-	br >> pkt;
+	PKT_S_TEST::BuffsList buffs = pkt->GetBuffsList();
 
-	if (pkt.Validate() == false)
-		return;
+	cout << "bufCount : " << buffs.Count() << endl;
+	for (int32 i = 0; i < buffs.Count(); i++)
+		cout << "BufInfo : " << buffs[i].buffId << " " << buffs[i].remainTime << endl;
 
-	vector<PKT_S_TEST::BuffsListItem> buffs;
+	for (auto it = buffs.begin(); it != buffs.end(); ++it)
+		cout << "BufInfo : " << it->buffId << " " << it->remainTime << endl;
 
-	buffs.resize(pkt.buffsCount);
-	for (int32 i = 0; i < pkt.buffsCount; i++)
-		br >> buffs[i];
-
-	cout << "BuffCount: " << pkt.buffsCount << endl;
-	for (int32 i = 0; i < pkt.buffsCount; i++)
-	{
-		cout << "BuffInfo : " << buffs[i].buffId << " " << buffs[i].remainTime << endl;
-	}
+	for (auto& buff : buffs)
+		cout << "BufInfo : " << buff.buffId << " " << buff.remainTime << endl;
 }
